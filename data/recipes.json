@@ -1,0 +1,20 @@
+[
+  {"id":"chicken-tacos","name":"Chicken tacos","type":"main","vegetarian":false,"ingredients":{"tortillas":2,"chicken":200,"lime":0.25,"oil":5},"prepTime":35,"description":"Corn tortillas with grilled chicken and lime.","allergens":[]},
+  {"id":"bean-tacos","name":"Black-bean tacos","type":"main","vegetarian":true,"ingredients":{"tortillas":2,"beans":150,"tomato":50,"lime":0.25},"prepTime":20,"description":"Hearty black beans in corn tortillas.","allergens":[]},
+  {"id":"cilantro-slaw","name":"Cilantro slaw","type":"side","vegetarian":true,"ingredients":{"cabbage":100,"carrots":30,"cilantro":3,"lime":0.25,"oil":5},"prepTime":15,"description":"Crunchy cabbage with fresh cilantro.","allergens":[]},
+  {"id":"lime-slaw","name":"Lime cabbage slaw","type":"side","vegetarian":true,"ingredients":{"cabbage":100,"carrots":30,"lime":0.25,"oil":5},"prepTime":15,"description":"Bright lime dressing without cilantro.","allergens":[]},
+  {"id":"fruit-cups","name":"Fruit cups","type":"dessert","vegetarian":true,"ingredients":{"melon":100,"berries":50},"prepTime":10,"description":"Fresh seasonal fruit portions.","allergens":[]},
+  {"id":"roasted-corn","name":"Roasted corn","type":"side","vegetarian":true,"ingredients":{"corn":100,"oil":5,"lime":0.25},"prepTime":20,"description":"Golden corn with lime.","allergens":[]},
+  {"id":"guacamole","name":"Guacamole","type":"starter","vegetarian":true,"ingredients":{"avocado":0.4,"lime":0.25,"tomato":30},"prepTime":10,"description":"Creamy avocado dip.","allergens":[]},
+  {"id":"tomato-salad","name":"Tomato cucumber salad","type":"side","vegetarian":true,"ingredients":{"tomato":80,"cucumber":80,"lime":0.25,"oil":5},"prepTime":10,"description":"Fresh chopped salad.","allergens":[]},
+  {"id":"chicken-bowls","name":"Chicken rice bowls","type":"main","vegetarian":false,"ingredients":{"chicken":200,"rice":80,"tomato":50,"oil":5},"prepTime":40,"description":"Grilled chicken over rice.","allergens":[]},
+  {"id":"chickpea-bowls","name":"Chickpea rice bowls","type":"main","vegetarian":true,"ingredients":{"chickpeas":150,"rice":80,"cucumber":50,"oil":5},"prepTime":25,"description":"Chickpeas with rice and cucumber.","allergens":[]},
+  {"id":"salsa","name":"Salsa fresca","type":"starter","vegetarian":true,"ingredients":{"tomato":100,"lime":0.25},"prepTime":10,"description":"Simple tomato and lime salsa.","allergens":[]},
+  {"id":"bean-dip","name":"Black-bean dip","type":"starter","vegetarian":true,"ingredients":{"beans":100,"lime":0.25,"oil":5},"prepTime":10,"description":"Smooth bean dip.","allergens":[]},
+  {"id":"berry-yogurt","name":"Berry yogurt cups","type":"dessert","vegetarian":true,"ingredients":{"yogurt":100,"berries":50},"prepTime":5,"description":"Yogurt topped with berries.","allergens":["milk"]},
+  {"id":"pasta-salad","name":"Pasta salad","type":"main","vegetarian":true,"ingredients":{"pasta":100,"tomato":80,"cheese":30,"oil":5},"prepTime":25,"description":"Pasta with tomatoes and feta.","allergens":["wheat","milk"]},
+  {"id":"peanut-tofu","name":"Peanut tofu bowls","type":"main","vegetarian":true,"ingredients":{"tofu":150,"peanuts":20,"rice":80,"oil":5},"prepTime":30,"description":"Tofu with a peanut topping.","allergens":["soy","peanuts"]},
+  {"id":"sesame-chickpeas","name":"Sesame chickpeas","type":"starter","vegetarian":true,"ingredients":{"chickpeas":100,"sesame":10,"oil":5},"prepTime":15,"description":"Warm chickpeas with sesame.","allergens":["sesame"]},
+  {"id":"melon-slices","name":"Melon slices","type":"dessert","vegetarian":true,"ingredients":{"melon":150},"prepTime":5,"description":"A simple dairy-free dessert.","allergens":[]},
+  {"id":"cumin-rice","name":"Cumin rice","type":"side","vegetarian":true,"ingredients":{"rice":80,"cumin":1,"oil":5},"prepTime":20,"description":"Aromatic cumin rice.","allergens":[]}
+]
