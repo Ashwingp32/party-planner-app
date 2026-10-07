@@ -20,7 +20,7 @@ For AI suggestions, set `GITHUB_TOKEN` in `.env` to a token with access to GitHu
 - `data/recipes.json`: per-serving quantities, ingredient references, vegetarian flags, allergens, and prep minutes for 18 dishes.
 - `data/ingredients.json`: units, pack sizes, allergens, and storage notes.
 - `data/stores.json`: five illustrative stores with location, distance in miles, current stock in ingredient units, expected restock quantities, and dates. **This is sample inventory, not a live store feed.** Update these JSON files and restart the server to change the catalog.
-- `data/plans/`: JSON plans saved atomically after every step confirmation; load/resume them with **Load saved plan**. The browser also saves edits and suggestion history using guarded localStorage. Invalid state or blocked storage does not stop rendering.
+- `data/plans/`: JSON plans and selected shopping stores saved atomically after every step confirmation; load/resume them with **Load saved plan**. The browser also saves edits and suggestion history using guarded localStorage. Invalid state or blocked storage does not stop rendering.
 - `logs/api.jsonl`: server-side request outcomes without tokens, raw prompts, or personal party data. Runtime plans and logs are gitignored.
 
 Availability checks use the full ingredient quantity, including shared ingredients when swapping dishes. “Now” can require combining stock from several stores; each store card checks its own stock. Restock dates are estimates, not guarantees. Ingredient reuse is the percentage of a replacement's ingredient IDs already present in the menu. Recipe exclusions do not guarantee protection against allergen cross-contact; check labels and consult the stores.

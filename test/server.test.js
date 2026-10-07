@@ -96,6 +96,7 @@ test('reject malformed request preferences and unsafe saved plans', () => {
   assert.throws(() => validatePlan({ ...defaultPlan(), id: '../../.env' }));
   assert.throws(() => validatePlan({ ...defaultPlan(), preferences: { ...preferences, diet: 'veg' }, rows: [{ id: 'chicken-tacos', servings: 1 }] }));
   assert.throws(() => validatePlan({ ...defaultPlan(), history: [{ context: 'dishes', date: 'invalid', suggestions: [] }] }));
+  assert.throws(() => validatePlan({ ...defaultPlan(), selectedStore: 'missing-store' }));
 });
 
 test('HTTP catalog, suggestion fallback, persistent resume, and static isolation', async t => {
@@ -121,17 +122,23 @@ test('HTTP catalog, suggestion fallback, persistent resume, and static isolation
   assert.equal(offline.status, 503);
   assert.match((await offline.json()).error, /manual selection/);
   assert.equal((await post('/api/suggestions', request, { Origin: 'https://evil.example' })).status, 403);
-  const party = { ...defaultPlan(), preferences, rows: [{ id: 'bean-tacos', servings: 20 }], originalRows: [{ id: 'bean-tacos', servings: 20 }], step: 3 };
+  const party = { ...defaultPlan(), preferences, rows: [{ id: 'bean-tacos', servings: 20 }], originalRows: [{ id: 'bean-tacos', servings: 20 }], selectedStore: 'market-a', step: 3 };
   const saved = await (await post('/api/plans', party)).json();
   assert.match(saved.id, /^[0-9a-f-]{36}$/);
   assert.equal((await (await fetch(base + '/api/plans')).json()).length, 1);
   const resumed = await (await fetch(base + `/api/plans/${saved.id}`)).json();
   assert.deepEqual(resumed.rows, party.rows);
   assert.equal(resumed.step, 3);
+  assert.equal(resumed.selectedStore, 'market-a');
   const updated = await (await post('/api/plans', { ...saved, step: 4 })).json();
   assert.equal(updated.id, saved.id);
   assert.equal((await (await fetch(base + '/api/plans')).json()).length, 1);
   assert.equal(JSON.parse(await readFile(join(dir, 'plans', `${saved.id}.json`), 'utf8')).step, 4);
+  const history = Array.from({ length: 100 }, () => ({
+    context: 'dishes', date: new Date().toISOString(),
+    suggestions: ['lime-slaw', 'fruit-cups', 'bean-dip'].map(id => ({ ...suggestion(id), reason: '☃'.repeat(500), availability: 'now' }))
+  }));
+  assert.equal((await post('/api/plans', { ...saved, history })).status, 200);
   for (const path of ['/.env', '/data/plans/' + saved.id + '.json', '/logs/api.jsonl', '/server.js', '/package.json']) {
     assert.equal((await fetch(base + path)).status, 404);
   }

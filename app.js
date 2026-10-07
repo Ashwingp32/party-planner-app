@@ -32,6 +32,7 @@ function recover(value) {
   clean.step = clean.rows.length || value.step < 2 ? value.step : 1;
   if (typeof value.id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(value.id)) clean.id = value.id;
   clean.selectedMenu = typeof value.selectedMenu === 'string' ? value.selectedMenu.slice(0, 100) : '';
+  clean.selectedStore = typeof value.selectedStore === 'string' && (!catalog || catalog.stores.some(s => s.id === value.selectedStore)) ? value.selectedStore : '';
   clean.changes = Array.isArray(value.changes) ? value.changes.filter(c => typeof c === 'string').slice(-100).map(c => c.slice(0, 200)) : [];
   clean.history = Array.isArray(value.history) ? value.history.filter(h =>
     h && ['menu', 'dishes', 'alternatives'].includes(h.context) && typeof h.date === 'string' && Number.isFinite(Date.parse(h.date)) &&
@@ -201,12 +202,12 @@ function shopping() {
   return `<h2>Where to buy</h2><p class="subtitle">Most ingredients in stock first, then nearest · sample locations</p>
     <div class="grid">${stores.map((s, i) => {
       const affected = problemRows([s]);
-      return `<article class="card"><h3>${escape(s.name)} ${i === 0 ? '<span class="badge">Recommended</span>' : ''}</h3><p>${s.distance} mi · ${escape(s.location.address)}</p>
+      return `<article class="card ${plan.selectedStore === s.id ? 'selected' : ''}"><h3>${escape(s.name)} ${i === 0 ? '<span class="badge">Recommended</span>' : ''}</h3><p>${s.distance} mi · ${escape(s.location.address)}</p>
         <p class="now">${s.count} of ${ids.length} ingredients in stock at the required quantity</p>
         ${ids.filter(id => ingredientAvailability(id, quantities[id], [s]).status !== 'now').map(id => `<p>${escape(catalog.ingredients[id].name)}: ${availabilityLabel(ingredientAvailability(id, quantities[id], [s]))}</p>`).join('')}
         ${affected.length ? `<p class="warning">If shopping only here, check: ${affected.map(r => escape(recipe(r.id).name)).join(', ')}.</p><button data-action="store-swaps" data-id="${s.id}">Find safe alternate dishes</button>` : '<p class="now">All ingredients expected by your party.</p>'}
         <details><summary>View basket</summary>${ids.map(id => `<p>${escape(catalog.ingredients[id].name)} · ${Math.ceil(quantities[id] / catalog.ingredients[id].packSize)} packs · ${availabilityLabel(ingredientAvailability(id, quantities[id], [s]))}</p>`).join('')}</details>
-        <button data-action="shop" data-id="${s.id}">Choose ${escape(s.name)}</button></article>`;
+        <button data-action="shop" data-id="${s.id}">${plan.selectedStore === s.id ? 'Selected' : `Choose ${escape(s.name)}`}</button></article>`;
     }).join('')}</div><details><summary>Suggestion history (${plan.history.length})</summary>${plan.history.map(h =>
       `<p>${escape(h.date)} · ${escape(h.context)} · ${h.suggestions.map(s => escape(recipe(s.id)?.name || s.id)).join(', ')}</p>`).join('') || '<p>No AI suggestions yet.</p>'}</details>${navigation('Save party plan')}`;
 }
@@ -267,18 +268,22 @@ async function save() {
     notice(`Saved on the server.${storageWarning ? ` ${storageWarning}` : ''}`);
   } catch (error) { notice(`${error.message}${storageWarning ? ` ${storageWarning}` : ' Your plan is saved in this browser.'}`); }
 }
+function commitSetup() {
+  const form = $('#setup');
+  if (!form.reportValidity()) return false;
+  const data = new FormData(form);
+  const p = { diet: data.get('diet'), guests: Number(data.get('guests')), vegetarians: Number(data.get('vegetarians')), allergies: data.getAll('allergies'), eventType: data.get('eventType').trim(), date: data.get('date') };
+  if (!validPreferences(p)) { notice('Check guest counts: vegetarians must be between zero and total guests.'); return false; }
+  if (JSON.stringify(p) !== JSON.stringify(plan.preferences)) {
+    plan.rows = []; plan.originalRows = []; plan.selectedMenu = ''; plan.selectedStore = ''; plan.changes = [];
+  }
+  plan.preferences = p;
+  return true;
+}
 async function next() {
   if (busy || !catalog) return;
   if (plan.step === 0) {
-    const form = $('#setup');
-    if (!form.reportValidity()) return;
-    const data = new FormData(form);
-    const p = { diet: data.get('diet'), guests: Number(data.get('guests')), vegetarians: Number(data.get('vegetarians')), allergies: data.getAll('allergies'), eventType: data.get('eventType').trim(), date: data.get('date') };
-    if (!validPreferences(p)) return notice('Check guest counts: vegetarians must be between zero and total guests.');
-    if (JSON.stringify(p) !== JSON.stringify(plan.preferences)) {
-      plan.rows = []; plan.originalRows = []; plan.selectedMenu = ''; plan.changes = [];
-    }
-    plan.preferences = p;
+    if (!commitSetup()) return;
   } else if (!plan.rows.length) return notice('Choose a menu or add at least one dish before continuing.');
   if (plan.step === 1) plan.originalRows = structuredClone(plan.rows);
   resetAI();
@@ -313,7 +318,14 @@ document.addEventListener('click', async event => {
   const button = event.target.closest('button');
   if (!button || button.disabled || busy) return;
   if (button.dataset.step !== undefined) {
-    resetAI(); plan.step = Number(button.dataset.step); render(); localSave(); return;
+    const destination = Number(button.dataset.step);
+    if (plan.step === 0 && destination > 0) {
+      if (!commitSetup()) return;
+      resetAI(); plan.step = destination > 1 && !plan.rows.length ? 1 : destination;
+      busy = true; render(); await save(); busy = false; render();
+      if ([1, 4].includes(plan.step)) suggest();
+    } else { resetAI(); plan.step = destination; render(); localSave(); }
+    return;
   }
   const action = button.dataset.action;
   if (action === 'next') return next();
@@ -338,6 +350,7 @@ document.addEventListener('click', async event => {
   if (action === 'all-stores') { storeId = ''; resetAI(); render(); suggest(); }
   if (action === 'store-swaps') { storeId = button.dataset.id; targetId = ''; plan.step = 4; resetAI(); render(); suggest(); }
   if (action === 'shop') {
+    plan.selectedStore = button.dataset.id;
     busy = true; render();
     await save();
     busy = false; render();

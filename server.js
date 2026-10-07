@@ -121,6 +121,7 @@ export function validatePlan(body) {
   if (typeof body.selectedMenu !== 'string' || body.selectedMenu.length > 100 ||
       !Array.isArray(body.changes) || body.changes.length > 100 || body.changes.some(c => typeof c !== 'string' || c.length > 200) ||
       !Array.isArray(body.history) || body.history.length > 100) throw bad('Invalid plan metadata.');
+  if (body.selectedStore !== undefined && body.selectedStore !== '' && !catalog.stores.some(s => s.id === body.selectedStore)) throw bad('Invalid selected store.');
   const history = body.history.map(entry => {
     if (!entry || !['menu', 'alternatives', 'dishes'].includes(entry.context) ||
         typeof entry.date !== 'string' || !Number.isFinite(Date.parse(entry.date)) ||
@@ -134,19 +135,19 @@ export function validatePlan(body) {
   });
   return { id: body.id || randomUUID(), step: body.step, preferences,
     rows: validateRows(body.rows, preferences), originalRows: validateRows(body.originalRows, preferences),
-    selectedMenu: body.selectedMenu, changes: body.changes, history, updatedAt: new Date().toISOString() };
+    selectedMenu: body.selectedMenu, selectedStore: body.selectedStore || '', changes: body.changes, history, updatedAt: new Date().toISOString() };
 }
 
-async function jsonBody(req) {
+async function jsonBody(req, maxBytes = 100000) {
   if (!req.headers['content-type']?.startsWith('application/json')) throw bad('Use application/json.', 415);
-  let text = '';
+  const chunks = [];
   let size = 0;
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > 100000) throw bad('Request too large.', 413);
-    text += chunk;
+    if (size > maxBytes) throw bad('Request too large.', 413);
+    chunks.push(chunk);
   }
-  try { return JSON.parse(text); } catch { throw bad('Invalid JSON.'); }
+  try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw bad('Invalid JSON.'); }
 }
 
 const assets = {
@@ -187,7 +188,7 @@ export function createServer({ suggest = copilotSuggestions, plansDir = join(roo
         } finally { aiBusy = false; }
       }
       if (req.method === 'POST' && url.pathname === '/api/plans') {
-        const plan = validatePlan(await jsonBody(req));
+        const plan = validatePlan(await jsonBody(req, 1000000));
         await mkdir(plansDir, { recursive: true });
         const file = join(plansDir, `${plan.id}.json`);
         const temp = join(plansDir, `${plan.id}.${randomUUID()}.tmp`);

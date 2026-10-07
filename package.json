@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node --test",
     "start": "node --env-file-if-exists=.env server.js",
-    "check": "node --check server.js && node --check app.js"
+    "check": "node --check server.js && node --check app.js && node --check domain.js"
   },
   "type": "module",
   "engines": {

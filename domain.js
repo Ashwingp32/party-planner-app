@@ -6,7 +6,7 @@ export function defaultPlan() {
   date.setDate(date.getDate() + 3);
   return {
     step: 0, preferences: { diet: 'both', guests: 20, vegetarians: 8, allergies: ['peanuts'], eventType: 'Birthday dinner', date: date.toISOString().slice(0, 10) },
-    rows: [], originalRows: [], selectedMenu: '', history: [], changes: []
+    rows: [], originalRows: [], selectedMenu: '', selectedStore: '', history: [], changes: []
   };
 }
 
