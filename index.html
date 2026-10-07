@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PartyPal — plan, cook, celebrate</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div><h1>PartyPal <span>✦</span></h1><p>Good food. Great company. A little less planning.</p></div>
+    <div class="toolbar"><button data-action="new">New party</button><button data-action="load">Load saved plan</button></div>
+  </header>
+  <main>
+    <nav id="tracker" aria-label="Party planning steps">
+      <button data-step="0">1 · Party setup</button>
+      <button data-step="1">2 · Choose menu</button>
+      <button data-step="2">3 · Edit items</button>
+      <button data-step="3">4 · Ingredients</button>
+      <button data-step="4">5 · Alternatives</button>
+      <button data-step="5">6 · Updated menu</button>
+      <button data-step="6">7 · Where to buy</button>
+    </nav>
+    <p id="notice" role="status" aria-live="polite"></p>
+    <section id="content" aria-live="polite"><h2>Plan your party</h2><p>Loading the local catalog…</p></section>
+    <section id="saved-plans" hidden aria-label="Saved party plans"></section>
+    <p class="disclaimer">Illustrative store locations, stock, and restock dates — not live inventory. Allergens are recipe exclusions, not a guarantee: always check labels and cross-contact risks.</p>
+  </main>
+  <footer>Made for gathering · Seven small steps to a great party</footer>
+  <noscript>Enable JavaScript to use the planner. The server keeps your saved party plans locally.</noscript>
+</body>
+</html>
